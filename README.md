@@ -29,12 +29,18 @@ node --test tests/catalog.test.mjs tests/curriculum.test.mjs tests/store.test.mj
 npm run build
 ```
 
-## 실제 배포 시 필요한 작업
+## GitHub Pages 배포
 
-이 저장소는 서버를 사용하는 Cloudflare Worker/Vinext 앱이며 GitHub Pages에 그대로 배포할 수 없습니다. GitHub 저장소 업로드와 실제 사이트 배포는 별개입니다.
+이 저장소는 GitHub Pages에서 직접 실행하는 정적 배포본을 제공합니다. `.github/workflows/pages.yml`이 314문제와 기록 보존 검사를 실행한 다음 `scripts/build-pages.mjs`로 사이트를 만들어 배포합니다.
 
-현재 인증은 Sites가 주입하는 검증된 사용자 헤더와 /signin-with-chatgpt 경로에 의존합니다. 별도 호스팅에 연결할 때는 새 호스팅에서 지원하는 인증을 구현하고, 외부 요청이 사용자 헤더를 위조할 수 없도록 해야 합니다. 단순 헤더 복사나 인증 우회로 대체하면 안 됩니다.
+배포 주소: https://liveref.github.io/gongjo-study/
 
-학습 기록은 기존 서비스의 Cloudflare D1에 남아 있습니다. 독립 호스팅에는 D1 연결과 인증 사용자 매핑 및 기록 이전 절차가 필요합니다. .openai/hosting.json의 기존 프로젝트 ID만으로 새 호스팅이 그 데이터베이스를 사용할 수는 없습니다.
+```sh
+node scripts/build-pages.mjs
+```
 
-실제 호스팅·인증·데이터 이전을 완료하기 전까지 기존 사이트를 계속 사용하세요. 이 저장소 업로드는 기존 사이트나 저장된 학습 기록을 변경하지 않습니다.
+GitHub Pages의 회독·오답노트 기록은 사용하는 브라우저에 저장됩니다. 기기를 옮길 때에는 기록 백업·복원을 사용하세요. 서버 로그인과 자동 동기화는 GitHub Pages에서 지원하지 않습니다.
+
+기존 Sites에 저장된 기록을 가져오려면 기존 사이트에서 로그인 후 기록 백업을 받고 새 사이트에서 복원하세요. 새 주소로 자동 이전되지는 않으며, 기존 서비스의 서버 기록은 변경하지 않습니다.
+
+기존 서버용 소스와 `public/sync.js`는 보존하고, Pages 배포본만 `public/sync-pages.js`를 사용합니다. 문제 데이터·사진·학습 순서는 그대로입니다. 사용자의 동의를 받아 코드와 교재 사진을 공개하는 저장소입니다.

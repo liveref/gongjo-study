@@ -1,0 +1,20 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+test('Pages preserves old records, stores wrong notes and rounds, and reloads across tabs without a server',()=>{
+ const id='2024-3-2-calc',storage=new Map([['gongjo-study-records-v1',JSON.stringify({[id]:{rounds:3,memo:'기존 메모',wrongNote:true}})]]);
+ const nodes=new Map(),get=key=>{if(!nodes.has(key))nodes.set(key,{});return nodes.get(key);};
+ const events={};let current;
+ const context={window:{addEventListener:(name,handler)=>events[name]=handler},document:{querySelector:get},localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)}};
+ vm.runInNewContext(readFileSync('public/sync-pages.js','utf8'),context);
+ const api=context.window.StudySync;
+ assert.equal(api.isReady(),false);
+ api.start({validate:x=>x,replace:x=>current=x});
+ assert.equal(current[id].memo,'기존 메모');assert.equal(current[id].rounds,3);assert.equal(current[id].wrongNote,true);
+ assert.equal(api.change(id,{wrongNote:false}),true);
+ api.guestSave({[id]:{...current[id],wrongNote:false,rounds:4}});
+ get('#syncNow').onclick();assert.equal(current[id].rounds,4);assert.equal(current[id].wrongNote,false);
+ storage.set('gongjo-study-records-v1',JSON.stringify({[id]:{rounds:5,wrongNote:true}}));events.storage({key:'gongjo-study-records-v1'});
+ assert.equal(current[id].rounds,5);assert.equal(current[id].wrongNote,true);assert.equal(get('#syncLogin').hidden,true);
+});
